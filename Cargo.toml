@@ -1,8 +1,14 @@
 [package]
-name = "dev-api"
+name = "dev_api"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+actix-web = "4"
+uuid = { version = "0.8.2", features = ["serde","v4"] }
+serde = { version = "1.0.136", features = ["derive"] }
+derive_more = "0.99.17"
+chrono = { version = "0.4", features = ["serde"] }
+jsonwebtoken = "8"

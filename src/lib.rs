@@ -1,3 +1,4 @@
+pub mod app;
 pub mod authorized;
 pub mod jwt;
 pub mod result;

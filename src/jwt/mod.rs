@@ -1,11 +1,8 @@
 use chrono::{Duration, Utc};
 use jsonwebtoken::{Algorithm, Header, Validation};
-use serde::{Serialize, Deserialize, de::DeserializeOwned};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use self::{
-    keys::Keys,
-    tokens::Tokens,
-};
+use self::{keys::Keys, tokens::Tokens};
 
 const JWT_EXP_MINUTES: i64 = 15;
 const REFRESH_TOKEN_EXP_WEEKS: i64 = 52;
@@ -14,7 +11,7 @@ pub fn get_access_expiration_seconds() -> i64 {
     Duration::minutes(JWT_EXP_MINUTES).num_seconds()
 }
 
-use crate::app::Result;
+use crate::{Error, Result};
 
 pub mod keys;
 pub mod tokens;
@@ -23,7 +20,7 @@ pub mod tokens;
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub enum TokenType {
     access,
-    refresh
+    refresh,
 }
 
 pub trait Claims {
@@ -64,11 +61,11 @@ impl Jwt {
         r#type: TokenType,
     ) -> Result<String> {
         Self::set_claims(claims, r#type);
-        
+
         let token = jsonwebtoken::encode(&Header::default(), &claims, keys.get_encoding_key())
             .map_err(|e| {
                 println!("{:?}", e);
-                crate::app::Error::internal_error()
+                Error::internal_error()
             })?;
 
         Ok(token)
@@ -82,10 +79,13 @@ impl Jwt {
 
         claims.set_type(r#type);
         claims.set_expiration((Utc::now() + expiration_duration).timestamp());
-    
     }
 
-    pub fn validate_jwt<T: Claims + DeserializeOwned>(&self, jwt: &str, r#type: TokenType) -> Result<T> {
+    pub fn validate_jwt<T: Claims + DeserializeOwned>(
+        &self,
+        jwt: &str,
+        r#type: TokenType,
+    ) -> Result<T> {
         let claims: T = jsonwebtoken::decode(
             jwt,
             self.keys.get_decoding_key(),
@@ -93,17 +93,17 @@ impl Jwt {
         )
         .map_err(|e| match e.into_kind() {
             jsonwebtoken::errors::ErrorKind::ExpiredSignature => match r#type {
-                TokenType::access => crate::app::Error::access_token_expired(),
-                TokenType::refresh => crate::app::Error::refresh_token_expired(),
+                TokenType::access => Error::access_token_expired(),
+                TokenType::refresh => Error::refresh_token_expired(),
             },
-            _ => crate::app::Error::authentication_failed(),
-    })?
+            _ => Error::authentication_failed(),
+        })?
         .claims;
 
         if r#type == claims.get_type() {
             Ok(claims)
         } else {
-            Err(crate::app::Error::bad_request("Invalid token type"))
+            Err(Error::bad_request("Invalid token type"))
         }
     }
 }

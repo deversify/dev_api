@@ -3,7 +3,7 @@ use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
 use futures::future::{err, ok, Ready};
 use serde::de::DeserializeOwned;
 
-use crate::app::{
+use crate::{
     jwt::{self, Jwt},
     Error, Result,
 };

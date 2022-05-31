@@ -1,5 +1,7 @@
 use actix_cors::Cors;
 use actix_web::{http, middleware::Logger, dev::{ServiceFactory, ServiceRequest, ServiceResponse}, body::MessageBody, Error, web};
+use crate::health;
+
 use super::ensure_env;
 
 pub fn new(configs: Vec<fn(&mut web::ServiceConfig)>) -> actix_web::App<
@@ -27,5 +29,6 @@ pub fn new(configs: Vec<fn(&mut web::ServiceConfig)>) -> actix_web::App<
         scope = scope.configure(config);
     }
 
+    scope = scope.configure(health::configure);
     app.service(scope)
 }

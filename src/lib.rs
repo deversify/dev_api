@@ -1,5 +1,7 @@
 mod authorized;
 mod env;
+mod health;
+
 pub mod tracing;
 pub mod http;
 pub mod jwt;

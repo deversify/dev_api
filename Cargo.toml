@@ -19,3 +19,11 @@ chrono = { version = "0.4", features = ["serde"] }
 jsonwebtoken = "8"
 actix-web-httpauth = "0.6.0"
 futures = "0.3.21"
+opentelemetry = { version = "0.17", features = ["rt-tokio-current-thread"] }
+opentelemetry-otlp = {version = "0.10.0", features = ["tonic", "tls", "tls-roots"]}
+tracing-opentelemetry = { version = "0.17" }
+tracing-actix-web = {version = "0.5.1", features = ["opentelemetry_0_17"]}
+tonic = "0.6"
+tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
+tracing-bunyan-formatter = "0.3"
+url = "2.2.2"

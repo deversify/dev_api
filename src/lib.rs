@@ -1,5 +1,4 @@
-pub mod app;
-pub mod authorized;
+mod authorized;
 mod env;
 pub mod jwt;
 pub mod result;

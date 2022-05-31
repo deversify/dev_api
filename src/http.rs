@@ -27,5 +27,5 @@ pub fn new(configs: Vec<fn(&mut web::ServiceConfig)>) -> actix_web::App<
         scope = scope.configure(config);
     }
 
-    app
+    app.service(scope)
 }

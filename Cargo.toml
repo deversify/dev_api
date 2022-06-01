@@ -28,3 +28,6 @@ tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
 tracing-bunyan-formatter = "0.3"
 url = "2.2.2"
 actix-cors = "0.6.1"
+sqlx = { version = "0.5.13", features = [ "runtime-actix-native-tls" , "mysql", "chrono", "uuid" ] }
+tracing = { version = "0.1", features = ["log"]}
+log = "0.4"

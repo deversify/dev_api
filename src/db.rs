@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::ensure_env;
 use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
 
@@ -5,7 +7,7 @@ pub async fn init_mysql() -> Pool<MySql> {
     tracing::info!("DB initializing...");
 
     let db_uri = ensure_env("DATABASE_URL");
-    let _migrate_db = ensure_env("MIGRATE_DB") == "ON";
+    let migrate_db = ensure_env("MIGRATE_DB") == "ON";
 
     let pool = MySqlPoolOptions::new()
         .connect(&db_uri)
@@ -19,20 +21,22 @@ pub async fn init_mysql() -> Pool<MySql> {
 
     tracing::info!("DB connection ensured.");
 
-    // if migrate_db {
-    //     tracing::info!("Migrations started...");
-    //     sqlx::migrate!()
-    //         .run(&pool)
-    //         .await
-    //         .map_err(|e| {
-    //             tracing::error!("{}", e);
-    //             e
-    //         })
-    //         .expect("Failed to run migrations!");
-    //     tracing::info!("Migrated DB!");
-    // } else {
-    //     tracing::info!("Migrations skipped.");
-    // }
+    if migrate_db {
+        tracing::info!("Migrations started...");
+        sqlx::migrate::Migrator::new(Path::new("./migrations"))
+            .await
+            .expect("Migrator could not be created.")
+            .run(&pool)
+            .await
+            .map_err(|e| {
+                tracing::error!("{}", e);
+                e
+            })
+            .expect("Failed to run migrations!");
+        tracing::info!("Migrated DB!");
+    } else {
+        tracing::info!("Migrations skipped.");
+    }
 
     tracing::info!("DB initialized!");
     pool

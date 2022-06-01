@@ -1,14 +1,18 @@
 use crate::env::ensure_env;
-use opentelemetry::{sdk::{trace, Resource}, trace::TraceError};
+use opentelemetry::{
+    sdk::{trace, Resource},
+    trace::TraceError,
+};
 use opentelemetry_otlp::WithExportConfig;
-use tracing_actix_web::root_span_macro::private::tracing;
-use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
-use tracing_subscriber::{EnvFilter, Registry, prelude::__tracing_subscriber_SubscriberExt};
 use std::str::FromStr;
 use tonic::{
     metadata::{MetadataKey, MetadataMap},
     transport::ClientTlsConfig,
 };
+use tracing_actix_web::root_span_macro::private::tracing;
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
+use tracing_log::LogTracer;
+use tracing_subscriber::{prelude::__tracing_subscriber_SubscriberExt, EnvFilter, Registry};
 use url::Url;
 
 const ENDPOINT: &str = "OTLP_TONIC_ENDPOINT";
@@ -33,12 +37,9 @@ pub fn init(service_name: String) -> Result<(), TraceError> {
 
     let tracer = opentelemetry_otlp::new_pipeline()
         .tracing()
-        .with_trace_config(trace::config().with_resource(
-            Resource::new(vec![opentelemetry::KeyValue::new(
-                "service.name",
-                service_name,
-            )]),
-        ))
+        .with_trace_config(trace::config().with_resource(Resource::new(vec![
+            opentelemetry::KeyValue::new("service.name", service_name),
+        ])))
         .with_exporter(
             opentelemetry_otlp::new_exporter()
                 .tonic()
@@ -56,6 +57,8 @@ pub fn init(service_name: String) -> Result<(), TraceError> {
 
     let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
 
+    LogTracer::init().expect("Failed to initialize log tracer.");
+
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
     let formatting_layer = BunyanFormattingLayer::new("app".into(), std::io::stdout);
     let subscriber = Registry::default()
@@ -64,6 +67,8 @@ pub fn init(service_name: String) -> Result<(), TraceError> {
         .with(JsonStorageLayer)
         .with(formatting_layer);
 
-    tracing::subscriber::set_global_default(subscriber).expect("Failed to install tracing subscriber.");
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("Failed to set global default tracing subscriber.");
+
     Ok(())
 }

@@ -31,3 +31,4 @@ actix-cors = "0.6.1"
 sqlx = { version = "0.5.13", features = [ "runtime-actix-native-tls" , "mysql", "chrono", "uuid" ] }
 tracing = { version = "0.1", features = ["log"]}
 log = "0.4"
+tracing-log = "0.1"

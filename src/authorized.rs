@@ -3,13 +3,11 @@ use std::collections::HashMap;
 use actix_web::{dev::Payload, http::header::Header, web, FromRequest, HttpRequest};
 use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
 use futures::future::{err, ok, Ready};
-use serde::de::DeserializeOwned;
 
 use crate::{
     jwt::{self, Jwt},
     Error, Result,
 };
-
 
 pub struct Authorized {
     claims: HashMap<String, serde_json::Value>,

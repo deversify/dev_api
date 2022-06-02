@@ -36,6 +36,8 @@ impl FromStr for TokenType {
     type Err = result::Error;
 
     fn from_str(input: &str) -> Result<TokenType> {
+        println!("input: {}", input);
+
         match input {
             "access" => Ok(TokenType::access),
             "refresh" => Ok(TokenType::refresh),
@@ -122,19 +124,20 @@ impl Jwt {
         })?
         .claims;
 
-        match claims.get("type") {
-            Some(raw_token_type) => match raw_token_type.to_string().parse() {
-                Ok(token_type) => {
-                    if r#type == token_type {
+        if let Some(raw_token_type) = claims.get("type") {
+            if let Some(token_type_str) = raw_token_type.as_str() {
+                if let Ok(token_type) = token_type_str.parse() {
+                    let result = if r#type == token_type {
                         Ok(claims)
                     } else {
                         Err(Error::bad_request("Invalid token type"))
-                    }
-                }
-                Err(_) => Err(Error::bad_request("Bad token")),
-            },
+                    };
 
-            None => Err(Error::bad_request("Bad token")),
+                    return result;
+                }
+            }
         }
+
+        Err(Error::authentication_failed())
     }
 }

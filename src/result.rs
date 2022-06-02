@@ -13,7 +13,7 @@ pub enum ErrorCode {
     AuthFailed,
     AccessTokenExpired,
     RefreshTokenExpired,
-        //Forbidden,
+    //Forbidden,
     BadRequest, /* AccessDenied,
                 , */
 }
@@ -81,7 +81,7 @@ impl Error {
             message: "Something went wrong.".into(),
             cid: Uuid::new_v4(),
         }
-    } 
+    }
 }
 
 impl actix_web::ResponseError for Error {

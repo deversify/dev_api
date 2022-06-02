@@ -15,6 +15,7 @@ use crate::{Error, Result};
 
 pub mod keys;
 pub mod tokens;
+pub mod controllers;
 
 #[allow(non_camel_case_types)]
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
@@ -85,7 +86,7 @@ impl Jwt {
         &self,
         jwt: &str,
         r#type: TokenType,
-    ) -> Result<T> {
+    ) -> Result<Box<T>> {
         let claims: T = jsonwebtoken::decode(
             jwt,
             self.keys.get_decoding_key(),
@@ -101,7 +102,7 @@ impl Jwt {
         .claims;
 
         if r#type == claims.get_type() {
-            Ok(claims)
+            Ok(Box::new(claims))
         } else {
             Err(Error::bad_request("Invalid token type"))
         }

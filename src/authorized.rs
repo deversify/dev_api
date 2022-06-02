@@ -36,7 +36,7 @@ impl<T: Claims + DeserializeOwned> Authorized<T> {
         };
 
         Ok(Authorized {
-            claims: jwt_manager.validate_jwt(jwt, jwt::TokenType::access)?,
+            claims: *jwt_manager.validate_jwt(jwt, jwt::TokenType::access)?,
         })
     }
 }

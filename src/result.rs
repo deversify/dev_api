@@ -8,11 +8,12 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Display, Serialize, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ErrorCode {
-    //NotFound,
+    NotFound,
     InternalError,
     AuthFailed,
     AccessTokenExpired,
     RefreshTokenExpired,
+    SignInTokenExpired,
     //Forbidden,
     BadRequest, /* AccessDenied,
                 , */
@@ -27,13 +28,13 @@ pub struct Error {
 }
 
 impl Error {
-    /* pub fn not_found(id: &str) -> Self {
+    pub fn not_found(id: &str) -> Self {
         Self {
             code: ErrorCode::NotFound,
             message: format!("Could not find {}.", id),
             cid: Uuid::new_v4(),
         }
-    } */
+    }
 
     pub fn bad_request_header(header_name: &str) -> Self {
         Self {
@@ -71,6 +72,14 @@ impl Error {
         Self {
             code: ErrorCode::RefreshTokenExpired,
             message: "Refresh token has expired.".into(),
+            cid: Uuid::new_v4(),
+        }
+    }
+
+    pub fn sign_in_token_expired() -> Self {
+        Self {
+            code: ErrorCode::SignInTokenExpired,
+            message: "Sign in token has expired.".into(),
             cid: Uuid::new_v4(),
         }
     }

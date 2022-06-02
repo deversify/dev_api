@@ -36,12 +36,10 @@ impl FromStr for TokenType {
     type Err = result::Error;
 
     fn from_str(input: &str) -> Result<TokenType> {
-        println!("input: {}", input);
-
         match input {
             "access" => Ok(TokenType::access),
             "refresh" => Ok(TokenType::refresh),
-            _ => Err(Error::internal_error()),
+            _ => Err(Error::authentication_failed()),
         }
     }
 }

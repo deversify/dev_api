@@ -1,6 +1,8 @@
+use std::{collections::HashMap, fmt, str::FromStr};
+
 use chrono::{Duration, Utc};
 use jsonwebtoken::{Algorithm, Header, Validation};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use self::{keys::Keys, tokens::Tokens};
 
@@ -11,8 +13,9 @@ pub fn get_access_expiration_seconds() -> i64 {
     Duration::minutes(JWT_EXP_MINUTES).num_seconds()
 }
 
-use crate::{Error, Result};
+use crate::{result, Error, Result};
 
+pub mod controllers;
 pub mod keys;
 pub mod tokens;
 
@@ -23,10 +26,24 @@ pub enum TokenType {
     refresh,
 }
 
-pub trait Claims {
-    fn set_expiration(&mut self, expiration: i64);
-    fn set_type(&mut self, token_type: TokenType);
-    fn get_type(&self) -> TokenType;
+impl fmt::Display for TokenType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl FromStr for TokenType {
+    type Err = result::Error;
+
+    fn from_str(input: &str) -> Result<TokenType> {
+        println!("input: {}", input);
+
+        match input {
+            "access" => Ok(TokenType::access),
+            "refresh" => Ok(TokenType::refresh),
+            _ => Err(Error::internal_error()),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -41,9 +58,12 @@ impl Jwt {
         }
     }
 
-    pub fn create_tokens<T: Claims + Serialize>(&self, mut claims: T) -> Result<Tokens> {
-        let access_token = Self::create_jwt(&mut claims, &self.keys, TokenType::access)?;
-        let refresh_token = Self::create_jwt(&mut claims, &self.keys, TokenType::refresh)?;
+    pub fn create_tokens(
+        &self,
+        extra_claims: HashMap<String, serde_json::Value>,
+    ) -> Result<Tokens> {
+        let access_token = Self::create_jwt(&extra_claims, &self.keys, TokenType::access)?;
+        let refresh_token = Self::create_jwt(&extra_claims, &self.keys, TokenType::refresh)?;
 
         let response = Tokens {
             access_token,
@@ -55,12 +75,26 @@ impl Jwt {
         Ok(response)
     }
 
-    fn create_jwt<T: Claims + Serialize>(
-        claims: &mut T,
+    fn create_jwt(
+        extra_claims: &HashMap<String, serde_json::Value>,
         keys: &Keys,
         r#type: TokenType,
     ) -> Result<String> {
-        Self::set_claims(claims, r#type);
+        let mut claims = extra_claims.clone();
+        let expiration_duration = match r#type {
+            TokenType::access => Duration::minutes(JWT_EXP_MINUTES),
+            TokenType::refresh => Duration::weeks(REFRESH_TOKEN_EXP_WEEKS),
+        };
+        claims.insert(
+            "type".to_string(),
+            serde_json::Value::String(r#type.to_string()),
+        );
+        claims.insert(
+            "exp".to_string(),
+            serde_json::Value::Number(serde_json::Number::from(
+                (Utc::now() + expiration_duration).timestamp(),
+            )),
+        );
 
         let token = jsonwebtoken::encode(&Header::default(), &claims, keys.get_encoding_key())
             .map_err(|e| {
@@ -71,22 +105,12 @@ impl Jwt {
         Ok(token)
     }
 
-    fn set_claims<T: Claims + Serialize>(claims: &mut T, r#type: TokenType) {
-        let expiration_duration = match r#type {
-            TokenType::access => Duration::minutes(JWT_EXP_MINUTES),
-            TokenType::refresh => Duration::weeks(REFRESH_TOKEN_EXP_WEEKS),
-        };
-
-        claims.set_type(r#type);
-        claims.set_expiration((Utc::now() + expiration_duration).timestamp());
-    }
-
-    pub fn validate_jwt<T: Claims + DeserializeOwned>(
+    pub fn validate_jwt(
         &self,
         jwt: &str,
         r#type: TokenType,
-    ) -> Result<T> {
-        let claims: T = jsonwebtoken::decode(
+    ) -> Result<HashMap<String, serde_json::Value>> {
+        let claims: HashMap<String, serde_json::Value> = jsonwebtoken::decode(
             jwt,
             self.keys.get_decoding_key(),
             &Validation::new(Algorithm::default()),
@@ -100,10 +124,20 @@ impl Jwt {
         })?
         .claims;
 
-        if r#type == claims.get_type() {
-            Ok(claims)
-        } else {
-            Err(Error::bad_request("Invalid token type"))
+        if let Some(raw_token_type) = claims.get("type") {
+            if let Some(token_type_str) = raw_token_type.as_str() {
+                if let Ok(token_type) = token_type_str.parse() {
+                    let result = if r#type == token_type {
+                        Ok(claims)
+                    } else {
+                        Err(Error::bad_request("Invalid token type"))
+                    };
+
+                    return result;
+                }
+            }
         }
+
+        Err(Error::authentication_failed())
     }
 }

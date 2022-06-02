@@ -1,21 +1,20 @@
+use std::collections::HashMap;
+
 use actix_web::{dev::Payload, http::header::Header, web, FromRequest, HttpRequest};
 use actix_web_httpauth::headers::authorization::{Authorization, Bearer};
 use futures::future::{err, ok, Ready};
-use serde::de::DeserializeOwned;
 
 use crate::{
     jwt::{self, Jwt},
     Error, Result,
 };
 
-use super::jwt::Claims;
-
-pub struct Authorized<T: Claims + DeserializeOwned> {
-    claims: T,
+pub struct Authorized {
+    claims: HashMap<String, serde_json::Value>,
 }
 
-impl<T: Claims + DeserializeOwned> Authorized<T> {
-    pub fn get_claims(&self) -> &T {
+impl Authorized {
+    pub fn get_claims(&self) -> &HashMap<String, serde_json::Value> {
         &self.claims
     }
 
@@ -41,7 +40,7 @@ impl<T: Claims + DeserializeOwned> Authorized<T> {
     }
 }
 
-impl<T: Claims + DeserializeOwned> FromRequest for Authorized<T> {
+impl FromRequest for Authorized {
     type Error = Error;
     type Future = Ready<Result<Self>>;
 

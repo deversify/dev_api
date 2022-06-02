@@ -1,8 +1,7 @@
 use std::path::Path;
 
 use crate::ensure_env;
-use sqlx::{mysql::MySqlPoolOptions, MySql, Pool, Postgres, postgres::PgPoolOptions};
-
+use sqlx::{mysql::MySqlPoolOptions, postgres::PgPoolOptions, MySql, Pool, Postgres};
 
 fn init() -> (String, bool) {
     tracing::info!("DB initializing...");
@@ -38,16 +37,13 @@ async fn finish_pg(pool: &Pool<Postgres>, migrate_db: bool) {
         tracing::info!("Migrations skipped.");
     }
 
-    tracing::info!("DB initialized!");    
+    tracing::info!("DB initialized!");
 }
 
 pub async fn init_pg() -> Pool<Postgres> {
     let (db_uri, migrate_db) = init();
 
-    let pool = PgPoolOptions::new()
-        .connect(&db_uri)
-        .await
-        .unwrap();
+    let pool = PgPoolOptions::new().connect(&db_uri).await.unwrap();
 
     finish_pg(&pool, migrate_db).await;
 
@@ -79,7 +75,7 @@ async fn finish_mysql(pool: &Pool<MySql>, migrate_db: bool) {
         tracing::info!("Migrations skipped.");
     }
 
-    tracing::info!("DB initialized!");    
+    tracing::info!("DB initialized!");
 }
 
 pub async fn init_mysql() -> Pool<MySql> {

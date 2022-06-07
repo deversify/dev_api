@@ -13,6 +13,10 @@ Note: given how early stage this project is, the example is not complete. You ne
 ```rust
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    dev_api::tracing::init("my-service".to_string()).expect("Failed to initialize tracer.");
+
+    tracing::info!("Starting server...");
+
 
     let server = HttpServer::new(move || {
         // The configure function must be a ServiceConfig factory function: https://docs.rs/actix-web/latest/actix_web/web/struct.ServiceConfig.html

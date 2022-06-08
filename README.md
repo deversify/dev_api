@@ -14,8 +14,11 @@ Note: given how early stage this project is, the example is not complete. You ne
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dev_api::tracing::init("my-service".to_string()).expect("Failed to initialize tracer.");
+    // All logs should be wrapped in a span. This is automatically done for each controller.
+    tracing::info_span!("main:server_starting").in_scope(|| {
+        tracing::info!("Starting server...");
+    });
 
-    tracing::info!("Starting server...");
 
 
     let server = HttpServer::new(move || {

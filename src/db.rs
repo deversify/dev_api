@@ -40,6 +40,7 @@ async fn finish_pg(pool: &Pool<Postgres>, migrate_db: bool) {
     tracing::info!("DB initialized!");
 }
 
+#[tracing::instrument(name = "init_pg")]
 pub async fn init_pg() -> Pool<Postgres> {
     let (db_uri, migrate_db) = init();
 
@@ -78,6 +79,7 @@ async fn finish_mysql(pool: &Pool<MySql>, migrate_db: bool) {
     tracing::info!("DB initialized!");
 }
 
+#[tracing::instrument(name = "init_mysql")]
 pub async fn init_mysql() -> Pool<MySql> {
     let (db_uri, migrate_db) = init();
 

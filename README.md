@@ -40,7 +40,10 @@ async fn main() -> std::io::Result<()> {
     .bind(("0.0.0.0", 8080))?
     .run();
 
-    println!("Server started!");
+    tracing::info_span!("main:server_started").in_scope(|| {
+        tracing::info!("Server started!");
+    });
+
     server.await
 ```
 

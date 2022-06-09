@@ -3,6 +3,7 @@ use std::path::Path;
 use crate::ensure_env;
 use sqlx::{mysql::MySqlPoolOptions, postgres::PgPoolOptions, MySql, Pool, Postgres};
 
+// This fn is the code we managed to generalize so far.
 fn init() -> (String, bool) {
     tracing::info!("DB initializing...");
 
@@ -12,6 +13,7 @@ fn init() -> (String, bool) {
     (db_uri, migrate_db)
 }
 
+// TODO: Generalize the code so that it works for any sqlx-supported DB.
 async fn finish_pg(pool: &Pool<Postgres>, migrate_db: bool) {
     let _row: (i32,) = sqlx::query_as("SELECT 1")
         .fetch_one(pool)
@@ -40,6 +42,7 @@ async fn finish_pg(pool: &Pool<Postgres>, migrate_db: bool) {
     tracing::info!("DB initialized!");
 }
 
+// TODO: Generalize the code so that it works for any sqlx-supported DB.
 #[tracing::instrument(name = "init_pg")]
 pub async fn init_pg() -> Pool<Postgres> {
     let (db_uri, migrate_db) = init();

@@ -14,6 +14,7 @@ pub enum ErrorCode {
     AccessTokenExpired,
     RefreshTokenExpired,
     SignInTokenExpired,
+    SignInTokenInvalid,
     //Forbidden,
     BadRequest, /* AccessDenied,
                 , */
@@ -80,6 +81,14 @@ impl Error {
         Self {
             code: ErrorCode::SignInTokenExpired,
             message: "Sign in token has expired.".into(),
+            cid: Uuid::new_v4(),
+        }
+    }
+
+    pub fn sign_in_token_invalid() -> Self {
+        Self {
+            code: ErrorCode::SignInTokenInvalid,
+            message: "Sign in token is invalid. The token might already have been used. Try initiating a sign in again.".into(),
             cid: Uuid::new_v4(),
         }
     }

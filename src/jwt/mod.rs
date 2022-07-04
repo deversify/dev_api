@@ -39,7 +39,7 @@ impl FromStr for TokenType {
         match input {
             "access" => Ok(TokenType::access),
             "refresh" => Ok(TokenType::refresh),
-            _ => Err(Error::authentication_failed()),
+            _ => Err(Error::identity_invalid()),
         }
     }
 }
@@ -118,7 +118,7 @@ impl Jwt {
                 TokenType::access => Error::access_token_expired(),
                 TokenType::refresh => Error::refresh_token_expired(),
             },
-            _ => Error::authentication_failed(),
+            _ => Error::identity_invalid(),
         })?
         .claims;
 
@@ -136,6 +136,6 @@ impl Jwt {
             }
         }
 
-        Err(Error::authentication_failed())
+        Err(Error::identity_invalid())
     }
 }

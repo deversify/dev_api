@@ -10,7 +10,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum ErrorCode {
     NotFound,
     InternalError,
-    AuthFailed,
+    IdentityInvalid,
     AccessTokenExpired,
     RefreshTokenExpired,
     SignInTokenExpired,
@@ -53,10 +53,10 @@ impl Error {
         }
     }
 
-    pub fn authentication_failed() -> Self {
+    pub fn identity_invalid() -> Self {
         Self {
-            code: ErrorCode::AuthFailed,
-            message: "Authentication failed.".into(),
+            code: ErrorCode::IdentityInvalid,
+            message: "Identity invalid. Try signing in again.".into(),
             cid: Uuid::new_v4(),
         }
     }

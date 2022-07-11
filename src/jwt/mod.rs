@@ -56,10 +56,6 @@ impl Jwt {
         }
     }
 
-    pub fn from(s: &str) -> Self {
-        Self::new(s.as_bytes())
-    }
-
     pub fn create_tokens(
         &self,
         extra_claims: HashMap<String, serde_json::Value>,
@@ -141,5 +137,13 @@ impl Jwt {
         }
 
         Err(Error::identity_invalid())
+    }
+}
+
+impl FromStr for Jwt {
+    type Err = result::Error;
+
+    fn from_str(input: &str) -> Result<Self> {
+        Ok(Self::new(input.as_bytes()))
     }
 }

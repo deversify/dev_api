@@ -65,7 +65,7 @@ impl Jwt {
 
         let response = Tokens {
             access_token,
-            token_type: "Bearer",
+            token_type: "Bearer".to_string(),
             expires_in: get_access_expiration_seconds(),
             refresh_token,
         };

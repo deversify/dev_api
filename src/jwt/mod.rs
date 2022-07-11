@@ -56,6 +56,10 @@ impl Jwt {
         }
     }
 
+    pub fn from(s: &str) -> Self {
+        Self::new(s.as_bytes())
+    }
+
     pub fn create_tokens(
         &self,
         extra_claims: HashMap<String, serde_json::Value>,

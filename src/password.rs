@@ -1,4 +1,14 @@
 //! Password hashing and verification using Argon2.
+//! # Example
+//! ```
+//! fn hash_and_verify() {
+//!     let password = "some_password";
+//!     let hashed_password = dev_api::password::hash(password).unwrap();
+//!     let result = dev_api::password::verify(&hashed_password, password);
+//!
+//!     assert_eq!(result, Ok(()));
+//! }
+//! ```
 
 use crate::{Error, Result};
 use argon2::Config;
@@ -19,19 +29,5 @@ pub fn verify(hash: &str, attempted_password: &str) -> Result<()> {
         Err(Error::identity_invalid())
     } else {
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn hash_and_verify() {
-        let password = "some_password";
-        let hashed_password = hash(password).unwrap();
-        let result = verify(&hashed_password, password);
-
-        assert_eq!(result, Ok(()));
     }
 }

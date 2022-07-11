@@ -139,3 +139,11 @@ impl Jwt {
         Err(Error::identity_invalid())
     }
 }
+
+impl FromStr for Jwt {
+    type Err = result::Error;
+
+    fn from_str(input: &str) -> Result<Self> {
+        Ok(Self::new(input.as_bytes()))
+    }
+}

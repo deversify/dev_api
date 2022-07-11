@@ -56,10 +56,12 @@ impl Jwt {
         }
     }
 
-    pub fn create_tokens(
-        &self,
-        extra_claims: HashMap<String, serde_json::Value>,
-    ) -> Result<Tokens> {
+    pub fn create_tokens(&self, extra_claims: HashMap<&str, &str>) -> Result<Tokens> {
+        let extra_claims = extra_claims
+            .into_iter()
+            .map(|(k, v)| (k.to_string(), serde_json::Value::String(v.to_string())))
+            .collect();
+
         let access_token = Self::create_jwt(&extra_claims, &self.keys, TokenType::access)?;
         let refresh_token = Self::create_jwt(&extra_claims, &self.keys, TokenType::refresh)?;
 

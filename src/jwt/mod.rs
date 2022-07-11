@@ -56,6 +56,15 @@ impl Jwt {
         }
     }
 
+    /// # Example
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use dev_api::jwt::Jwt;
+    /// use std::str::FromStr;
+    ///
+    /// let jwt = Jwt::new(b"secret");
+    /// let tokens = jwt.create_tokens_from_str(HashMap::from([("sub", "2ca44c87-f9a9-4cb8-bffc-7e5d2e6350cb")]));
+    /// ```
     pub fn create_tokens_from_str(&self, extra_claims: HashMap<&str, &str>) -> Result<Tokens> {
         self.create_tokens(
             extra_claims

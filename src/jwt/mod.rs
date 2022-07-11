@@ -50,6 +50,12 @@ pub struct Jwt {
 }
 
 impl Jwt {
+    /// # Example
+    /// ```rust
+    /// use dev_api::jwt::Jwt;
+    ///
+    /// let jwt = Jwt::new(b"secret");
+    ///
     pub fn new(bytes: &[u8]) -> Self {
         Self {
             keys: Keys::new(bytes),
@@ -155,13 +161,5 @@ impl Jwt {
         }
 
         Err(Error::identity_invalid())
-    }
-}
-
-impl FromStr for Jwt {
-    type Err = result::Error;
-
-    fn from_str(input: &str) -> Result<Self> {
-        Ok(Self::new(input.as_bytes()))
     }
 }

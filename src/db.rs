@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::ensure_env;
+use crate::{ensure_env, Error};
 use sqlx::{mysql::MySqlPoolOptions, postgres::PgPoolOptions, MySql, Pool, Postgres};
 
 // This fn is the code we managed to generalize so far.
@@ -93,4 +93,11 @@ pub async fn init_mysql() -> Pool<MySql> {
 
     finish_mysql(&pool, migrate_db).await;
     pool
+}
+
+impl From<sqlx::Error> for Error {
+    fn from(error: sqlx::Error) -> Self {
+        tracing::error!("{:?}", error);
+        Error::internal_error()
+    }
 }

@@ -33,3 +33,5 @@ sqlx = { version = "0.5.13", features = [ "runtime-actix-native-tls" , "mysql", 
 tracing = { version = "0.1", features = ["log"]}
 log = "0.4"
 tracing-log = "0.1"
+rand = "0.8.5"
+rust-argon2 = "1.0.0"

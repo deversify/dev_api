@@ -1,3 +1,5 @@
+//! Password hashing and verification using Argon2.
+
 use crate::{Error, Result};
 use argon2::Config;
 use rand::Rng;

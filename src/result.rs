@@ -110,6 +110,15 @@ impl actix_web::ResponseError for Error {
             _ => HttpResponse::BadRequest(),
         };
 
+        let cid_string = self.cid.to_string();
+        let cid = cid_string.as_str();
+
+        tracing::event!(
+            tracing::Level::WARN,
+            application_cid = cid,
+            "Application CID"
+        );
+
         response.json(self)
     }
 }

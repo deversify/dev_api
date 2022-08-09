@@ -12,3 +12,5 @@ pub mod tracing;
 pub use authorized::*;
 pub use env::*;
 pub use result::*;
+
+pub mod domains;

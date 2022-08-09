@@ -54,6 +54,34 @@ pub async fn init_pg() -> Pool<Postgres> {
     pool
 }
 
+pub async fn migrate_mysql(pool: &Pool<MySql>) -> crate::Result<()> {
+    tracing::info!("Migrations started...");
+
+    sqlx::migrate::Migrator::new(Path::new("./migrations"))
+        .await
+        .expect("Migrator could not be created.")
+        .run(pool)
+        .await?;
+
+    tracing::info!("Migrated DB!");
+
+    Ok(())
+}
+
+pub async fn migrate_postgres(pool: &Pool<Postgres>) -> crate::Result<()> {
+    tracing::info!("Migrations started...");
+
+    sqlx::migrate::Migrator::new(Path::new("./migrations"))
+        .await
+        .expect("Migrator could not be created.")
+        .run(pool)
+        .await?;
+
+    tracing::info!("Migrated DB!");
+
+    Ok(())
+}
+
 async fn finish_mysql(pool: &Pool<MySql>, migrate_db: bool) {
     let _row: (i64,) = sqlx::query_as("SELECT 1")
         .fetch_one(pool)
@@ -97,6 +125,13 @@ pub async fn init_mysql() -> Pool<MySql> {
 
 impl From<sqlx::Error> for Error {
     fn from(error: sqlx::Error) -> Self {
+        tracing::error!("{:?}", error);
+        Error::internal_error()
+    }
+}
+
+impl From<sqlx::migrate::MigrateError> for Error {
+    fn from(error: sqlx::migrate::MigrateError) -> Self {
         tracing::error!("{:?}", error);
         Error::internal_error()
     }

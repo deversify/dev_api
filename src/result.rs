@@ -16,8 +16,9 @@ pub enum ErrorCode {
     SignInTokenExpired,
     SignInTokenInvalid,
     //Forbidden,
-    BadRequest, /* AccessDenied,
-                , */
+    BadRequest,
+    NotAuthorized, /* AccessDenied,
+                   , */
 }
 
 #[derive(Debug, Display, Serialize, PartialEq)]
@@ -97,6 +98,14 @@ impl Error {
         Self {
             code: ErrorCode::InternalError,
             message: "Something went wrong.".into(),
+            cid: Uuid::new_v4(),
+        }
+    }
+
+    pub(crate) fn not_authorized(role_required: &str) -> Self {
+        Self {
+            code: ErrorCode::NotAuthorized,
+            message: format!("Missing required role {role_required}."),
             cid: Uuid::new_v4(),
         }
     }

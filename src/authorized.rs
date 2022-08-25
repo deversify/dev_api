@@ -14,6 +14,22 @@ pub struct Authorized {
 }
 
 impl Authorized {
+    pub fn has_role(&self, role: &str) -> Result<()> {
+        let roles = self
+            .claims
+            .get("roles")
+            .ok_or_else(|| crate::Error::not_authorized(role))?
+            .as_array()
+            .ok_or_else(crate::Error::identity_invalid)?;
+
+        let has_role = roles.iter().any(|r| r == role);
+
+        if !has_role {
+            return Err(crate::Error::not_authorized(role));
+        }
+        Ok(())
+    }
+
     pub fn get_claims(&self) -> &HashMap<String, serde_json::Value> {
         &self.claims
     }

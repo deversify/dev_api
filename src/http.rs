@@ -8,6 +8,10 @@ use actix_web::{
 };
 use tracing_actix_web::TracingLogger;
 
+fn split_hosts(host_env_var: String) -> Vec<String> {
+    host_env_var.split(',').map(|s| s.to_string()).collect()
+}
+
 pub fn new(
     configs: Vec<fn(&mut web::ServiceConfig)>,
 ) -> actix_web::App<
@@ -20,9 +24,9 @@ pub fn new(
     >,
 > {
     let frontend_host = ensure_env("FRONTEND_HOST");
+    let hosts = split_hosts(frontend_host);
 
-    let cors = Cors::default()
-        .allowed_origin(&frontend_host)
+    let mut cors = Cors::default()
         .allowed_methods(vec!["GET", "POST"])
         .allowed_headers(vec![
             http::header::AUTHORIZATION,
@@ -30,6 +34,10 @@ pub fn new(
             http::header::CONTENT_TYPE,
         ])
         .max_age(3600);
+
+    for host in hosts {
+        cors = cors.allowed_origin(&host);
+    }
 
     let app = actix_web::App::new()
         .wrap(TracingLogger::default())

@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, Display, Serialize, PartialEq)]
+#[derive(Debug, Display, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ErrorCode {
     NotFound,
@@ -21,7 +21,7 @@ pub enum ErrorCode {
     AccessDenied,
 }
 
-#[derive(Debug, Display, Serialize, PartialEq)]
+#[derive(Debug, Display, Serialize, PartialEq, Eq)]
 #[display(fmt = "[{}]:{}", code, message)]
 pub struct Error {
     message: String,

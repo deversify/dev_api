@@ -17,8 +17,8 @@ pub enum ErrorCode {
     SignInTokenInvalid,
     //Forbidden,
     BadRequest,
-    NotAuthorized, /* AccessDenied,
-                   , */
+    NotAuthorized,
+    AccessDenied,
 }
 
 #[derive(Debug, Display, Serialize, PartialEq)]
@@ -106,6 +106,16 @@ impl Error {
         Self {
             code: ErrorCode::NotAuthorized,
             message: format!("Missing required role {role_required}."),
+            cid: Uuid::new_v4(),
+        }
+    }
+
+    pub fn access_denied(actual_role: &str, expected_role: &str) -> Self {
+        Self {
+            code: ErrorCode::AccessDenied,
+            message: format!(
+                "Access denied. Found role {actual_role}, expected role {expected_role}"
+            ),
             cid: Uuid::new_v4(),
         }
     }

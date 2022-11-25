@@ -26,14 +26,7 @@ pub fn new(
     let frontend_host = ensure_env("FRONTEND_HOST");
     let hosts = split_hosts(frontend_host);
 
-    let mut cors = Cors::default()
-        .allowed_methods(vec!["GET", "POST"])
-        .allowed_headers(vec![
-            http::header::AUTHORIZATION,
-            http::header::ACCEPT,
-            http::header::CONTENT_TYPE,
-        ])
-        .max_age(3600);
+    let mut cors = Cors::default().max_age(3600);
 
     for host in hosts {
         cors = cors.allowed_origin(&host);
